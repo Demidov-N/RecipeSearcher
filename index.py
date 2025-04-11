@@ -7,7 +7,10 @@ if not java_home:
 else:
     print(java_home)
 
+import json
+from pyserini.analysis import Analyzer, get_lucene_analyzer
 from pyserini.index import LuceneIndexReader
+analyzer = Analyzer(get_lucene_analyzer())
 
 def filter_csv(filename):
     output_rows = []
@@ -24,8 +27,37 @@ def filter_csv(filename):
             writer.writerow(row)
 
 #filter_csv('full_dataset.csv')
-with open('trimmed_dataset.csv', newline='', encoding='utf-8') as f:
-    reader = csv.DictReader(f, delimiter=",")
-    for row in reader:
-        print(row)
-        break
+def build_indices():
+    with open('trimmed_dataset.csv', newline='', encoding='utf-8') as f:
+        index_source = []
+        index_ingredients = []
+        index_content = []
+        csv_reader = csv.DictReader(f, delimiter=",")
+        for row in csv_reader:
+            content = row['title'] + '\n' + '\n'.join(json.loads(row['directions']))
+            ingredients = json.loads(row['NER'])
+            index_source.append({
+                'id': row['link'],
+                'content': content,
+                'content_length': len(analyzer.analyze(content)),
+                'ingredients': ingredients,
+            })
+            index_ingredients.append({
+                'id': row['link'],
+                'contents': ', '.join(ingredients)
+            })
+            index_content.append({
+                'id': row['link'],
+                'contents': content
+            })
+        with open('ingredients/ingredients.json', 'w', encoding='utf-8') as file:
+            file.write(json.dumps(index_ingredients))
+        with open('content/content.json', 'w', encoding='utf-8') as file:
+            file.write(json.dumps(index_content))
+
+reader = LuceneIndexReader('indexes/content')
+import itertools
+for term in itertools.islice(reader.terms(), 10):
+    print(f'{term.term} (df={term.df}, cf={term.cf})')
+
+print(reader.stats())

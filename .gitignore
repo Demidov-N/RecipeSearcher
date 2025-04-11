@@ -1,2 +1,4 @@
 full_dataset.csv
 trimmed_dataset.csv
+*.json
+indexes/
