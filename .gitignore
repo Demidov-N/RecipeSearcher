@@ -1,5 +1,6 @@
 full_dataset.csv
 trimmed_dataset.csv
-*.json
 indexes/
 **/__pycache__
+*.json
+*.zip
