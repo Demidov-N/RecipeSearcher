@@ -55,9 +55,38 @@ def build_indices():
         with open('content/content.json', 'w', encoding='utf-8') as file:
             file.write(json.dumps(index_content))
 
-reader = LuceneIndexReader('indexes/content')
-import itertools
-for term in itertools.islice(reader.terms(), 10):
-    print(f'{term.term} (df={term.df}, cf={term.cf})')
+def build_indices_from_json():
+    with open('foodrecipes.json', encoding='utf-8') as f:
+        recipes = json.load(f)
+        index_ingredients = []
+        index_content = []
+        for i in range(250000):
+            if i >= len(recipes):
+                break
+            recipe = recipes[i]
+            index_ingredients.append({
+                'id': recipe['canonical_url'],
+                'contents': ', '.join(recipe['ingredients'])
+            })
+            keywords = ' '.join(recipe['keywords']) if 'keywords' in recipe.keys() else " "
+            yields =  recipe['yields'] if 'yields' in recipe.keys() else " "
+            description = recipe['description'] if 'description' in recipe.keys() else " "
+            index_content.append({
+                'id': recipe['canonical_url'],
+                'contents': '\n'.join([recipe['title'], description, keywords, yields])
+            })
+        with open('ingredients/ingredients.json', 'w+', encoding='utf-8') as file:
+            file.write(json.dumps(index_ingredients))
+        with open('content/content.json', 'w+', encoding='utf-8') as file:
+            file.write(json.dumps(index_content))
 
-print(reader.stats())
+
+build_indices_from_json()
+
+#use this code to see index stats
+#reader = LuceneIndexReader('indexes/ingredients')
+#import itertools
+#for term in itertools.islice(reader.terms(), 5):
+#    print(f'{term.term} (df={term.df}, cf={term.cf})')
+
+#print(reader.stats())
