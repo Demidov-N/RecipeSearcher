@@ -8,13 +8,15 @@ python -m pyserini.index.lucene \
   --input files/index_jsons/content \
   --index indexes/content \
   --generator DefaultLuceneDocumentGenerator \
-  --threads 1
+  --threads 1 \
+  --storeRaw
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
   --input files/index_jsons/ingredients \
   --index indexes/ingredients \
   --generator DefaultLuceneDocumentGenerator \
-  --threads 1
+  --threads 1 \
+  --storeRaw
 
 #sleep(100)

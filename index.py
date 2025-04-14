@@ -87,9 +87,10 @@ def build_indices_from_json():
 build_indices_from_json()
 
 #use this code to see index stats
-#reader = LuceneIndexReader('indexes/ingredients')
+#reader = LuceneIndexReader('indexes/content')
 #import itertools
 #for term in itertools.islice(reader.terms(), 5):
 #    print(f'{term.term} (df={term.df}, cf={term.cf})')
 
 #print(reader.stats())
+#print(reader.doc("https://www.food.com/recipe/1-pot-4-item-sausage-suprise-447710").raw())
