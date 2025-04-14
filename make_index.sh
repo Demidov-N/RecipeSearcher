@@ -1,17 +1,20 @@
 #!/bin/sh
+echo "Preparing JSON files for Indexing"
+python index.py
+echo "Files Prepared, Starting to Index"
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input content \
+  --input files/index_jsons/content \
   --index indexes/content \
   --generator DefaultLuceneDocumentGenerator \
   --threads 1
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input ingredients \
+  --input files/index_jsons/ingredients \
   --index indexes/ingredients \
   --generator DefaultLuceneDocumentGenerator \
   --threads 1
 
-sleep(100)
+#sleep(100)

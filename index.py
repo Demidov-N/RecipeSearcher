@@ -1,15 +1,16 @@
 import os
 import csv
-java_home = os.environ.get('JAVA_HOME', None)
-if not java_home:
-    java_path = 'C:/Program Files/Java/jdk-21'
-    os.environ['JAVA_HOME'] = java_path
-else:
-    print(java_home)
 
 import json
+
 from pyserini.analysis import Analyzer, get_lucene_analyzer
 from pyserini.index import LuceneIndexReader
+
+# SETTINGS
+INGREDIENTS_RAW_PATH = 'files/raw/foodrecipes.json'
+INGREDIENT_INDEX_PATH = 'files/index_jsons/ingredients/ingredients.json'
+CONTENT_INDEX_PATH = 'files/index_jsons/content/content.json'
+
 analyzer = Analyzer(get_lucene_analyzer())
 
 def filter_csv(filename):
@@ -56,7 +57,9 @@ def build_indices():
             file.write(json.dumps(index_content))
 
 def build_indices_from_json():
-    with open('foodrecipes.json', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(INGREDIENT_INDEX_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(CONTENT_INDEX_PATH), exist_ok=True)
+    with open(INGREDIENTS_RAW_PATH, encoding='utf-8') as f:
         recipes = json.load(f)
         index_ingredients = []
         index_content = []
@@ -75,9 +78,9 @@ def build_indices_from_json():
                 'id': recipe['canonical_url'],
                 'contents': '\n'.join([recipe['title'], description, keywords, yields])
             })
-        with open('ingredients/ingredients.json', 'w+', encoding='utf-8') as file:
+        with open(INGREDIENT_INDEX_PATH, 'w+', encoding='utf-8') as file:
             file.write(json.dumps(index_ingredients))
-        with open('content/content.json', 'w+', encoding='utf-8') as file:
+        with open(CONTENT_INDEX_PATH, 'w+', encoding='utf-8') as file:
             file.write(json.dumps(index_content))
 
 
