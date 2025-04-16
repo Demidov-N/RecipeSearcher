@@ -1,5 +1,5 @@
 import json
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import spacy
 
@@ -8,7 +8,7 @@ from ingredient_parser import parse_ingredient
 
 
 FOODRECIPES_RAW = 'files/raw/foodrecipes.json'
-FOODRECIPES_CLEAN = 'files/raw/foodrecipes_new.json'
+FOODRECIPES_CLEAN = 'files/raw/foodrecipes_cleaned.json'
 
 # Global variable to hold the spaCy model for each worker
 nlp = None
@@ -21,6 +21,7 @@ def init_worker():
     global nlp
     nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"])
 
+
 def process_recipe(recipe):
     """
     Process one recipe:
@@ -31,6 +32,7 @@ def process_recipe(recipe):
     global nlp
     new_recipe = {
         "title": recipe.get("title", ""),
+        'canonical_url': recipe.get("canonical_url", ""),
         "keywords": recipe.get("keywords", []),
         "yields": recipe.get("yields", ""),
         "description": recipe.get("description", "")
@@ -41,33 +43,32 @@ def process_recipe(recipe):
     
     for ing in raw_ingredients:
         # Lowercase and strip extra whitespace.
-        ing_text = ing.lower().strip()
-        # Create a spaCy Doc for the ingredient.
-        doc = nlp(ing_text)
-        # Lemmatize the ingredient string.
-        lemmatized_str = " ".join([token.lemma_ for token in doc])
-        # Use the external ingredient parser to extract structured data.
-        parsed = parse_ingredient(lemmatized_str)
-        ingredient_name = ""
-        # Assume parsed.name is a list of IngredientText objects.
+        parsed = parse_ingredient(ing)
         if hasattr(parsed, "name") and isinstance(parsed.name, list) and parsed.name:
-            ingredient_name = parsed.name[0].text.strip()
-        processed_ingredients.append(ingredient_name)
+            for name in parsed.name:
+                lemmatized_ing = ""
+                if hasattr(name, "text"):
+                    ing = name.text.strip()
+                    lemmatized_ing = " ".join([token.lemma_.lower() for token in nlp(ing) if not token.is_stop and not token.is_punct])
+                processed_ingredients.append(lemmatized_ing)
     
     new_recipe["ingredients"] = processed_ingredients
     return new_recipe
 
 def main():
     # Load recipes from input JSON.
-    with open(FOODRECIPES_RAW, "r") as f:
+    with open(FOODRECIPES_RAW, "r", encoding="UTF-8") as f:
+        print("Loading recipes...")
         recipes = json.load(f)
-    
+        print("Recipes loaded, preparing for processing...")
     new_recipes = []
     
     # Create a ProcessPoolExecutor with, for example, 4 workers.
     with ProcessPoolExecutor(max_workers=8, initializer=init_worker) as executor:
         # Submit each recipe for processing.
-        futures = [executor.submit(process_recipe, recipe) for recipe in recipes]
+        print("Preparing futures")
+        futures = [executor.submit(process_recipe, recipe) for recipe in tqdm(recipes, desc="Submitting recipes")]  
+        print("Showing progress bar")
         # Use tqdm to track progress.
         for future in tqdm(as_completed(futures), total=len(futures), desc="Processing recipes"):
             try:

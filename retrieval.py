@@ -1,7 +1,28 @@
+from typing import override
 import numpy as np
 from pyserini.index import LuceneIndexReader
 from pyserini.search.lucene import LuceneSearcher
 import bisect # https://docs.python.org/3/library/bisect.html
+
+class LuceneCustomRecipeReader(LuceneIndexReader):
+    """Custom Lucene index reader for recipe search. The only addition is that every time the required
+    methods are called, we are going to first process the recipe into the undercores, bacuse by default the 
+    Anserini is not supporting full phrase indexing """
+    
+    def _preprocess_ingredient(self, ingredient):
+        return ingredient.replace(' ', '_')
+    
+    @override
+    def get_postings_list(self, term, analyzer=None):
+        term = self._preprocess_ingredient(term)
+        return super().get_postings_list(term, analyzer=analyzer)
+    
+    @override
+    def get_term_counts(self, term, analyzer = None):
+        term = self._preprocess_ingredient(term)
+        return super().get_term_counts(term, analyzer)
+    
+
 
 class RecipeSearcher:
     def __init__(self, ingredient_path, content_path):

@@ -7,8 +7,8 @@ from pyserini.analysis import Analyzer, get_lucene_analyzer
 from pyserini.index import LuceneIndexReader
 
 # SETTINGS
-INGREDIENTS_RAW_PATH = 'files/raw/foodrecipes.json'
-INGREDIENT_INDEX_PATH = 'files/index_jsons/ingredients/ingredients.json'
+INGREDIENTS_RAW_PATH = 'files/raw/foodrecipes_cleaned.json'
+INGREDIENT_INDEX_PATH = 'files/index_jsons/ingredients_pretokenized/ingredients_pretokenized.json'
 CONTENT_INDEX_PATH = 'files/index_jsons/content/content.json'
 
 analyzer = Analyzer(get_lucene_analyzer())
@@ -67,16 +67,17 @@ def build_indices_from_json():
             if i >= len(recipes):
                 break
             recipe = recipes[i]
+            ingredients = list(map(lambda x: x.replace(" ", "_"), recipe['ingredients']))
             index_ingredients.append({
                 'id': recipe['canonical_url'],
-                'contents': ', '.join(recipe['ingredients'])
+                'contents': ' '.join(ingredients)
             })
             keywords = ' '.join(recipe['keywords']) if 'keywords' in recipe.keys() else " "
             yields =  recipe['yields'] if 'yields' in recipe.keys() else " "
             description = recipe['description'] if 'description' in recipe.keys() else " "
             index_content.append({
                 'id': recipe['canonical_url'],
-                'contents': '\n'.join([recipe['title'], description, keywords, yields])
+                'cotents': '\n'.join([recipe['title'], description, keywords, yields])
             })
         with open(INGREDIENT_INDEX_PATH, 'w+', encoding='utf-8') as file:
             file.write(json.dumps(index_ingredients))

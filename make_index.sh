@@ -13,10 +13,12 @@ python -m pyserini.index.lucene \
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input files/index_jsons/ingredients \
-  --index indexes/ingredients \
+  --input files/index_jsons/ingredients_pretokenized \
+  --index indexes/ingredients_pretokenized \
   --generator DefaultLuceneDocumentGenerator \
   --threads 1 \
-  --storeRaw
+  --storeRaw \
+  --pretokenized 
+  
 
 #sleep(100)
