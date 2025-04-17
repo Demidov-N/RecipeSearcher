@@ -5,6 +5,8 @@ from pyserini.index import LuceneIndexReader
 from pyserini.search.lucene import LuceneSearcher
 import bisect # https://docs.python.org/3/library/bisect.html
 import json
+import math
+from collections import defaultdict
 from scipy.sparse import csr_matrix
 
 class LuceneCustomRecipeReader(LuceneIndexReader):
@@ -130,10 +132,10 @@ class IngredientSearcher:
         ]
 
 class RecipeSearcher:
-    def __init__(self, ingredient_path, content_path):
-        self.ingredient_reader = LuceneIndexReader(ingredient_path)
+    def __init__(self, content_path):
+        #self.ingredient_reader = LuceneIndexReader(ingredient_path)
         self.content_reader = LuceneIndexReader(content_path)
-        self.ingredient_searcher = LuceneSearcher(ingredient_path)
+        #self.ingredient_searcher = LuceneSearcher(ingredient_path)
         self.content_searcher = LuceneSearcher(content_path)
         self.content_docinfo = []
         for i in range(self.content_searcher.num_docs):
@@ -195,6 +197,33 @@ class RecipeSearcher:
         top_k.reverse()
         # return in the same format as reader.search function
         
+        return top_k
+    
+class CustomRecipeSearcher:
+    def __init__(self, content_path, ingredient_path, index_stats_path, synonym_path = None):
+        self.ingredient_searcher = IngredientSearcher(ingredient_path, index_stats_path, synonym_path)
+        self.content_searcher = RecipeSearcher(content_path)
+
+    # Generic sigmoid function
+    def sigmoid(x):
+        return 1 / (1 + math.exp(-x))
+    
+    # Convert each result list into dictionary that returns default 0 if key not found, normalize scores with sigmoid
+    def _convert_scores(self, scores: list[tuple]):
+        return defaultdict(lambda :0, { k: self.sigmoid(v) for (k, v) in scores})
+
+    # Does a search and returns combined results
+    # Simple = sum of sigmoid of sub scores is score
+    def search(self, ingredients_str, keywords_str, k=1000, nsyms=5, ranking='simple'):
+        ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
+        keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
+        top_k = []
+        match ranking:
+            case 'simple':
+                for key in (list(ingredient_results.keys()) + list(keyword_results.keys())):
+                    bisect.insort(top_k, (key, ingredient_results[key] + keyword_results[key]), key=lambda x:x[1])
+            case _:
+                raise ValueError('invalid ranking method')
         return top_k
     
 # run a trial ingredient searcher
