@@ -77,7 +77,7 @@ def build_indices_from_json():
             description = recipe['description'] if 'description' in recipe.keys() else " "
             index_content.append({
                 'id': recipe['canonical_url'],
-                'cotents': '\n'.join([recipe['title'], description, keywords, yields])
+                'contents': '\n'.join([recipe['title'], description, keywords, yields])
             })
         with open(INGREDIENT_INDEX_PATH, 'w+', encoding='utf-8') as file:
             file.write(json.dumps(index_ingredients))
