@@ -210,7 +210,14 @@ class CustomRecipeSearcher:
     
     # Convert each result list into dictionary that returns default 0 if key not found, normalize scores with sigmoid
     def _convert_scores(self, scores: list[tuple]):
-        return defaultdict(lambda :0, { x[0]: self.sigmoid(x[1]) for x in scores})
+        res = defaultdict(lambda :{'score': 0, 'rank': 1})
+        for i in range(len(scores)):
+            x = scores[i]
+            res[x[0]] = {
+                'score': self.sigmoid(x[1]),
+                'rank': i + 1
+            }
+        return res
 
     # Does a search and returns combined results
     # Simple = sum of sigmoid of sub scores is score
@@ -220,8 +227,13 @@ class CustomRecipeSearcher:
         top_k = []
         match ranking:
             case 'simple':
-                for key in (list(ingredient_results.keys()) + list(keyword_results.keys())):
-                    bisect.insort(top_k, (key, ingredient_results[key] + keyword_results[key]), key=lambda x:x[1])
+                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
+                    bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
+            case 'rrf':
+                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
+                    ingr_score = ingredient_results[key]['score'] / ingredient_results[key]['rank']
+                    keyword_score = keyword_results[key]['score'] / keyword_results[key]['rank']
+                    bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
             case _:
                 raise ValueError('invalid ranking method')
         top_k.reverse()
@@ -237,6 +249,6 @@ if __name__ == "__main__":
     
     ingredient_searcher = CustomRecipeSearcher(content_index, index, stats)#, synonym_path=ingredients_synonyms)
     
-    result = ingredient_searcher.search('chicken breast, parmesan', 'quick', k=10)
+    result = ingredient_searcher.search('chicken breast, parmesan', 'quick', k=10, ranking='rrf')
     
     print(result)
