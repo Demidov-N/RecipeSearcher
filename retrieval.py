@@ -1,5 +1,5 @@
 from re import S
-from typing import override
+#from typing import override
 import numpy as np
 from pyserini.index import LuceneIndexReader
 from pyserini.search.lucene import LuceneSearcher
@@ -17,12 +17,12 @@ class LuceneCustomRecipeReader(LuceneIndexReader):
     def _preprocess_ingredient(self, ingredient):
         return ingredient.replace(' ', '_')
     
-    @override
+    #@override
     def get_postings_list(self, term, analyzer=None):
         term = self._preprocess_ingredient(term)
         return super().get_postings_list(term, analyzer=analyzer)
     
-    @override
+    #@override
     def get_term_counts(self, term, analyzer = None):
         term = self._preprocess_ingredient(term)
         return super().get_term_counts(term, analyzer)
@@ -51,7 +51,7 @@ class IngredientSearcher:
             # start with the ingredient itself at weight=1
             syns = [(ing, 1.0)]
             # add up to nsyms synonyms (term, score)
-            if ing in self.synonyms:
+            if self.synonyms is not None and ing in self.synonyms:
                 for term, _, score in self.synonyms[ing][:nsyms]:
                     syns.append((term, float(score)))
             groups[ing] = syns
@@ -140,7 +140,7 @@ class RecipeSearcher:
         self.content_docinfo = []
         for i in range(self.content_searcher.num_docs):
             self.content_docinfo.append({
-                'n': len(self.content_reader.analyze(self.content_searcher.doc(i).raw()['contents'])),
+                'n': len(self.content_reader.analyze(json.loads(self.content_searcher.doc(i).raw())['contents'])),
                 'id': i,
                 'iid': self.content_searcher.doc(i).docid()
             })
@@ -205,12 +205,12 @@ class CustomRecipeSearcher:
         self.content_searcher = RecipeSearcher(content_path)
 
     # Generic sigmoid function
-    def sigmoid(x):
+    def sigmoid(self, x):
         return 1 / (1 + math.exp(-x))
     
     # Convert each result list into dictionary that returns default 0 if key not found, normalize scores with sigmoid
     def _convert_scores(self, scores: list[tuple]):
-        return defaultdict(lambda :0, { k: self.sigmoid(v) for (k, v) in scores})
+        return defaultdict(lambda :0, { x[0]: self.sigmoid(x[1]) for x in scores})
 
     # Does a search and returns combined results
     # Simple = sum of sigmoid of sub scores is score
@@ -224,17 +224,19 @@ class CustomRecipeSearcher:
                     bisect.insort(top_k, (key, ingredient_results[key] + keyword_results[key]), key=lambda x:x[1])
             case _:
                 raise ValueError('invalid ranking method')
+        top_k.reverse()
         return top_k
     
 # run a trial ingredient searcher
 
 if __name__ == "__main__":
+    content_index = 'indexes/content'
     index = 'indexes/ingredients_pretokenized'
     stats = 'indexes/stats/ingredients_pretokenized.json'
     ingredients_synonyms = 'files/other/synonyms.json'
     
-    ingredient_searcher = IngredientSearcher(index, stats, ingredients_synonyms)
+    ingredient_searcher = CustomRecipeSearcher(content_index, index, stats)#, synonym_path=ingredients_synonyms)
     
-    result = ingredient_searcher.search_ingredients('chicken breast, parmesan', k=10)
+    result = ingredient_searcher.search('chicken breast, parmesan', 'quick', k=10)
     
     print(result)

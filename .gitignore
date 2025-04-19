@@ -4,3 +4,4 @@ indexes/
 **/__pycache__
 *.json
 *.zip
+/venv/*

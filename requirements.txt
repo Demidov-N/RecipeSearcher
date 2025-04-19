@@ -16,3 +16,6 @@ timelib>=0.2.5
 w3lib>=1.22.0
 zope.interface>=5.4.0
 recipe_scrapers>=14.0.0
+numpy
+pyserini
+scipy
