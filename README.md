@@ -5,5 +5,8 @@
         - It contain zip archive of 2 files one is raw index and another contains with cleaned, processed and tokenized ingredients, unpack both of them in the path `files/raw`
         - Synonyms put in directory `files/other`
 
+- To make it possible to run install `requirements.txt`
+- Also, make sure to run `spacy download en_core_web_sm` as the ingredient preprocessing and analyzing is relied on that library and this type of model
+
 # Indexing
 To create the index run index.py and then make_index.sh

@@ -8,14 +8,27 @@ import json
 import math
 from collections import defaultdict
 from scipy.sparse import csr_matrix
+import spacy
+
+from scripts.generating_synonyms import SYNONYMS_OUTPUT_PATH
+
+CONTENT_INDEX = 'indexes/content'
+INGREDIENT_INDEX = 'indexes/ingredients_pretokenized'
+INGREDIENT_STATS = 'indexes/stats/ingredients_pretokenized.json'
+INGREDIENT_SYNONYMS = 'files/other/synonyms.json'
 
 class LuceneCustomRecipeReader(LuceneIndexReader):
     """Custom Lucene index reader for recipe search. The only addition is that every time the required
     methods are called, we are going to first process the recipe into the undercores, bacuse by default the 
     Anserini is not supporting full phrase indexing """
     
+    def __init__(self, index_path):
+        super().__init__(index_path)
+        self.nlp = spacy.load("en_core_web_sm")
+    
     def _preprocess_ingredient(self, ingredient):
-        return ingredient.replace(' ', '_')
+        ingredient = [token.lemma_.lower() for token in self.nlp(ingredient) if not token.is_stop and not token.is_punct]
+        return "_".join(ingredient)
     
     #@override
     def get_postings_list(self, term, analyzer=None):
@@ -44,6 +57,7 @@ class IngredientSearcher:
     def search_ingredients(self, ingredients_string, k=1000, nsyms=5):
         # 1) Parse the user’s comma‑separated ingredients
         ingredients = [ing.strip() for ing in ingredients_string.split(',')]
+        ingredients = list(set(ingredients))  
 
         # 2) Build one group per original ingredient
         groups = {}
@@ -80,18 +94,25 @@ class IngredientSearcher:
         dl = np.array(self.stats['dl'])
         avgdl = self.stats['avgdl']
 
-        terms = list(set(ingredients_list))
+        terms = ingredients_list
 
         rows, cols, data = [], [], []
         df = np.zeros(len(terms), dtype=float)
 
         for j, term in enumerate(terms):
             postings = reader.get_postings_list(term, analyzer=None)
-            df[j] = len(postings)
-            for posting in postings:
-                rows.append(posting.docid)
+            if postings is None:
+                print("No postings for term:", term)
+                df[j] = 0
+                rows.append(0)
                 cols.append(j)
-                data.append(posting.tf)
+                data.append(0)
+            else:
+                df[j] = len(postings)
+                for posting in postings:
+                    rows.append(posting.docid)
+                    cols.append(j)
+                    data.append(posting.tf)
 
         idf = np.log((N - df + 0.5) / (df + 0.5) + 1.0)
         if ingredient_weights is not None:
@@ -215,7 +236,7 @@ class CustomRecipeSearcher:
 
     # Does a search and returns combined results
     # Simple = sum of sigmoid of sub scores is score
-    def search(self, ingredients_str, keywords_str, k=1000, nsyms=5, ranking='simple'):
+    def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple'):
         ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
         keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
         top_k = []
@@ -236,13 +257,10 @@ class CustomRecipeSearcher:
 # run a trial ingredient searcher
 
 if __name__ == "__main__":
-    content_index = 'indexes/content'
-    index = 'indexes/ingredients_pretokenized'
-    stats = 'indexes/stats/ingredients_pretokenized.json'
-    ingredients_synonyms = 'files/other/synonyms.json'
     
-    ingredient_searcher = CustomRecipeSearcher(content_index, index, stats)#, synonym_path=ingredients_synonyms)
+    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS)#, synonym_path=ingredients_synonyms)
     
-    result = ingredient_searcher.search('chicken breast, parmesan', 'quick', k=10, ranking='rrf')
+    result = ingredient_searcher.search(ingredients_str='chicken breast, parmesan',
+                                        keywords_str='quick', k=10, ranking='rrf')
     
     print(result)

@@ -19,3 +19,5 @@ recipe_scrapers>=14.0.0
 numpy
 pyserini
 scipy
+ipykernel
+ipywidgets
