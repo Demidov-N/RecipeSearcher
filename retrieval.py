@@ -73,17 +73,15 @@ class IngredientSearcher:
             k=k
         )
             
-    def _bm25search_ingredients(self, ingredients_list, ingredient_weights = None, reader = None, docinfo = None, 
+    def _bm25search_ingredients(self, ingredients_list, ingredient_weights = None, 
+                                reader = None, docinfo = None, 
                                 k=1000, k1=1.5, b=0.75, coverage_alpha = 1):
-        # 1) Basic stats
         N = self.ingredient_searcher.num_docs
         dl = np.array(self.stats['dl'])
         avgdl = self.stats['avgdl']
 
-        # dedupe query terms
-        terms = list(dict.fromkeys(ingredients_list))
+        terms = list(set(ingredients_list))
 
-        # 2) Gather postings + compute df
         rows, cols, data = [], [], []
         df = np.zeros(len(terms), dtype=float)
 
@@ -95,17 +93,14 @@ class IngredientSearcher:
                 cols.append(j)
                 data.append(posting.tf)
 
-        # 3) IDF
         idf = np.log((N - df + 0.5) / (df + 0.5) + 1.0)
         if ingredient_weights is not None:
             w = np.array(ingredient_weights)
             idf = idf * w    
         
 
-        # 4) Build sparse TF matrix
         tf_sparse = csr_matrix((data, (rows, cols)), shape=(N, len(terms)), dtype=float)
 
-        # 5) BM25 scoring
         scores = np.zeros(N, dtype=float)
         for j in range(len(terms)):
             tf_col = tf_sparse[:, j].toarray().ravel()
@@ -121,7 +116,6 @@ class IngredientSearcher:
         adjusted_scores = scores * (1 + coverage_alpha * coverage)
 
 
-        # 6) Top‑k
         topk_idx   = np.argpartition(-adjusted_scores, k)[:k]
         topk_scores = adjusted_scores[topk_idx]
         order      = np.argsort(-topk_scores)

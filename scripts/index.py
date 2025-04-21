@@ -4,12 +4,13 @@ import csv
 import json
 
 from pyserini.analysis import Analyzer, get_lucene_analyzer
-from pyserini.index import LuceneIndexReader
 
 # SETTINGS
 INGREDIENTS_RAW_PATH = 'files/raw/foodrecipes_cleaned.json'
 INGREDIENT_INDEX_PATH = 'files/index_jsons/ingredients_pretokenized/ingredients_pretokenized.json'
 CONTENT_INDEX_PATH = 'files/index_jsons/content/content.json'
+STATS_PATH = 'indexes/stats/ingredients_pretokenized.json'
+
 
 analyzer = Analyzer(get_lucene_analyzer())
 
@@ -85,7 +86,8 @@ def build_indices_from_json():
             file.write(json.dumps(index_content))
 
 
-build_indices_from_json()
+if __name__ == "__main__":
+    build_indices_from_json()
 
 #use this code to see index stats
 #reader = LuceneIndexReader('indexes/content')

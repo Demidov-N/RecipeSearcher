@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "Preparing JSON files for Indexing"
-python index.py
+python scripts/index.py
 echo "Files Prepared, Starting to Index"
 
 python -m pyserini.index.lucene \
@@ -20,5 +20,6 @@ python -m pyserini.index.lucene \
   --storeRaw \
   --pretokenized 
   
+python scripts/generate_index_statistics.py
 
 #sleep(100)
