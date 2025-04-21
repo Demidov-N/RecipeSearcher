@@ -18,5 +18,5 @@ engine = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS,
 
 @app.post("/search/")
 async def search(req: Search):
-    return {"results": engine.search(ingredients_str=req.ingredients,
-                                        keywords_str=req.keywords, k=10, ranking=req.type)}
+    return {"results": [x[0] for x in engine.search(ingredients_str=req.ingredients,
+                                        keywords_str=req.keywords, k=10, ranking=req.type)]}
