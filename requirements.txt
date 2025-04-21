@@ -1,4 +1,5 @@
-
+fastapi
+pydantic
 
 # Requirements for Scraping, may be ommitted if not running it 
 Scrapy>=2.5.0

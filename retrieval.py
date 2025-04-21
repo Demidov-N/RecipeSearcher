@@ -244,13 +244,11 @@ class CustomRecipeSearcher:
             case 'simple':
                 for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
                     bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
-            case 'rrf':
+            case _:
                 for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
                     ingr_score = ingredient_results[key]['score'] / ingredient_results[key]['rank']
                     keyword_score = keyword_results[key]['score'] / keyword_results[key]['rank']
                     bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
-            case _:
-                raise ValueError('invalid ranking method')
         top_k.reverse()
         return top_k
     
@@ -258,7 +256,7 @@ class CustomRecipeSearcher:
 
 if __name__ == "__main__":
     
-    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS)#, synonym_path=ingredients_synonyms)
+    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS)
     
     result = ingredient_searcher.search(ingredients_str='chicken breast, parmesan',
                                         keywords_str='quick', k=10, ranking='rrf')
