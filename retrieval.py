@@ -12,6 +12,8 @@ import spacy
 
 from scripts.generating_synonyms import SYNONYMS_OUTPUT_PATH
 
+
+
 CONTENT_INDEX = 'indexes/content'
 INGREDIENT_INDEX = 'indexes/ingredients_pretokenized'
 INGREDIENT_STATS = 'indexes/stats/ingredients_pretokenized.json'
@@ -136,7 +138,8 @@ class IngredientSearcher:
         
         adjusted_scores = scores * (1 + coverage_alpha * coverage)
 
-
+        if k == "all":
+            k = np.sum(adjusted_scores > 0)
         topk_idx   = np.argpartition(-adjusted_scores, k)[:k]
         topk_scores = adjusted_scores[topk_idx]
         order      = np.argsort(-topk_scores)
@@ -237,6 +240,19 @@ class CustomRecipeSearcher:
     # Does a search and returns combined results
     # Simple = sum of sigmoid of sub scores is score
     def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple'):
+        ingredient_results = None
+        keyword_results = None
+        if ingredients_str == "" and keywords_str == "":
+            raise ValueError("Both ingredients and keywords cannot be empty")
+        if keywords_str == "":
+            ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
+            ingredient_results = sorted([(ing, ingredient_results[ing]['score']) for ing in ingredient_results], key=lambda x: x[1], reverse=True)
+            return ingredient_results
+        elif ingredients_str == "":
+            keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
+            keyword_results = sorted([(ing, keyword_results[ing]['score']) for ing in keyword_results], key=lambda x: x[1], reverse=True)
+            return keyword_results
+        
         ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
         keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
         top_k = []
@@ -246,8 +262,10 @@ class CustomRecipeSearcher:
                     bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
             case _:
                 for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
-                    ingr_score = ingredient_results[key]['score'] / ingredient_results[key]['rank']
-                    keyword_score = keyword_results[key]['score'] / keyword_results[key]['rank']
+                    ingredient_results_key = ingredient_results.get(key, {'score': 0, 'rank': 1})
+                    keyword_results_key = keyword_results.get(key, {'score': 0, 'rank': 1})
+                    ingr_score = ingredient_results_key['score'] / ingredient_results_key['rank']
+                    keyword_score = keyword_results_key['score'] / keyword_results_key['rank']
                     bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
         top_k.reverse()
         return top_k
