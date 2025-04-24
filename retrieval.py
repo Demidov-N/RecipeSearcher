@@ -11,13 +11,30 @@ from scipy.sparse import csr_matrix
 import spacy
 
 from scripts.generating_synonyms import SYNONYMS_OUTPUT_PATH
-
-
+import shelve
+from tqdm import tqdm
+from pprint import pprint
 
 CONTENT_INDEX = 'indexes/content'
 INGREDIENT_INDEX = 'indexes/ingredients_pretokenized'
 INGREDIENT_STATS = 'indexes/stats/ingredients_pretokenized.json'
 INGREDIENT_SYNONYMS = 'files/other/synonyms.json'
+RECIPE_SHELVES_PATH = 'files/foodrecipes_shelves/foodrecipes_shelves.db'
+
+class RecipeInfoRetrieval:
+    def __init__(self, recipe_path):
+        self.recipe_path = recipe_path
+        
+    def open(self):
+        self.shelf = shelve.open(self.recipe_path)
+        return self
+            
+    def get_recipe(self, recipe_id):
+        recipe = self.shelf.get(recipe_id)
+        return recipe
+    
+    def close(self):
+        self.shelf.close()
 
 class LuceneCustomRecipeReader(LuceneIndexReader):
     """Custom Lucene index reader for recipe search. The only addition is that every time the required
@@ -218,9 +235,13 @@ class RecipeSearcher:
         return top_k
     
 class CustomRecipeSearcher:
-    def __init__(self, content_path, ingredient_path, index_stats_path, synonym_path = None):
+    def __init__(self, content_path, ingredient_path, index_stats_path, synonym_path = None, recipe_path = None):
         self.ingredient_searcher = IngredientSearcher(ingredient_path, index_stats_path, synonym_path)
         self.content_searcher = RecipeSearcher(content_path)
+        if recipe_path is not None:
+            self.recipe_reader = RecipeInfoRetrieval(recipe_path)
+        else:
+            self.recipe_reader = None
 
     # Generic sigmoid function
     def sigmoid(self, x):
@@ -236,10 +257,26 @@ class CustomRecipeSearcher:
                 'rank': i + 1
             }
         return res
+    
+    def _filter_by(self, recipe_results, comparison_key, range):
+        # Filter the results by the given range
+        filtered_results = []
+        for recipe in recipe_results:
+            if isinstance(comparison_key, str):
+                recipe_value = float(recipe[2].get(comparison_key, None))
+            else:
+                recipe_value = recipe[2][comparison_key[0]]
+                for key in comparison_key[1:]:
+                    recipe_value = recipe_value.get(key, None)
+            if recipe_value is not None and range[0] <= recipe_value <= range[1]:
+                filtered_results.append(recipe)
+        return filtered_results
+
 
     # Does a search and returns combined results
     # Simple = sum of sigmoid of sub scores is score
-    def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple'):
+    def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple', return_full_recipes=False,
+               cooking_range=None, calories_range=None, serving_size_range=None):
         ingredient_results = None
         keyword_results = None
         if ingredients_str == "" and keywords_str == "":
@@ -272,15 +309,36 @@ class CustomRecipeSearcher:
                     if len(top_k) > k:
                         top_k.pop(0)
         top_k.reverse()
-        return top_k[:k]
+        top_k = top_k[:k]
+        if return_full_recipes or cooking_range is not None or calories_range is not None or serving_size_range is not None:
+            if self.recipe_reader is None:
+                raise ValueError("Recipe reader is not set, cannot return full recipes")
+            # get the full recipe for each recipe id and append it to the top_k list
+            self.recipe_reader.open()
+            for i in range(len(top_k)):
+                recipe = self.recipe_reader.get_recipe(top_k[i][0])
+                if recipe is not None:
+                    top_k[i] = (top_k[i][0], top_k[i][1], recipe)
+                else:
+                    top_k[i] = (top_k[i][0], top_k[i][1], None)
+            self.recipe_reader.close()
+            # filter the results by the given ranges
+            if cooking_range is not None:
+                top_k = self._filter_by(top_k, 'total_time', cooking_range)
+            if calories_range is not None:
+                top_k = self._filter_by(top_k, 'calories', calories_range)
+            if serving_size_range is not None:
+                top_k = self._filter_by(top_k, 'yields', serving_size_range)
+        return top_k
     
 # run a trial ingredient searcher
 
 if __name__ == "__main__":
     
-    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS)
+    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS, 
+                                                recipe_path=RECIPE_SHELVES_PATH)
     
     result = ingredient_searcher.search(ingredients_str='chicken breast, parmesan',
-                                        keywords_str='quick', k=10, ranking='rrf')
+                                        keywords_str='quick', k=100, ranking='rrf', cooking_range=(0, 300))
     
-    print(result)
+    pprint(result)

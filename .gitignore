@@ -6,3 +6,4 @@ indexes/
 *.zip
 /venv/*
 evaluation/annotations.csv
+files/foodrecipes_shelves
