@@ -253,13 +253,15 @@ class CustomRecipeSearcher:
             keyword_results = sorted([(ing, keyword_results[ing]['score']) for ing in keyword_results], key=lambda x: x[1], reverse=True)
             return keyword_results
         
-        ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
-        keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
+        ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k*10, nsyms))
+        keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k*10))
         top_k = []
         match ranking:
             case 'simple':
                 for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
                     bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
+                    if len(top_k) > k:
+                        top_k.pop(0)
             case _:
                 for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
                     ingredient_results_key = ingredient_results.get(key, {'score': 0, 'rank': 1})
@@ -267,8 +269,10 @@ class CustomRecipeSearcher:
                     ingr_score = ingredient_results_key['score'] / ingredient_results_key['rank']
                     keyword_score = keyword_results_key['score'] / keyword_results_key['rank']
                     bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
+                    if len(top_k) > k:
+                        top_k.pop(0)
         top_k.reverse()
-        return top_k
+        return top_k[:k]
     
 # run a trial ingredient searcher
 

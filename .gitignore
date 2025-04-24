@@ -5,3 +5,4 @@ indexes/
 *.json
 *.zip
 /venv/*
+evaluation/annotations.csv
