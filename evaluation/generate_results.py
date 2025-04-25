@@ -1,4 +1,5 @@
 import json
+from re import M
 import os, sys
 
 path = os.path.abspath(os.curdir)
@@ -9,6 +10,9 @@ if path not in sys.path:
 from retrieval import CustomRecipeSearcher
 import pandas as pd
 from tqdm import tqdm
+
+# Method to generate results for the search engine
+COMBINING_METHOD = 'simple' # or 'rrf'
 
 # Path FROM THE ROOT OF THE PROJECT
 QUERRIES_PATH = 'evaluation/querries.csv'
@@ -36,7 +40,7 @@ def generate_results(searcher: CustomRecipeSearcher, querries, n_results=10):
             keywords = ""
         
         result = searcher.search(ingredients_str=ingredients, keywords_str=keywords,
-                                 k=n_results, ranking="rrf")
+                                 k=n_results, ranking=COMBINING_METHOD)
         result_list.append({
             'ingredients': ingredients,
             'keywords': keywords,

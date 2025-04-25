@@ -7,11 +7,12 @@ CONTENT_INDEX = 'indexes/content'
 INGREDIENT_INDEX = 'indexes/ingredients_pretokenized'
 INGREDIENT_STATS = 'indexes/stats/ingredients_pretokenized.json'
 INGREDIENT_SYNONYMS = 'files/other/synonyms.json'
-recipe_path = 'files/raw/foodrecipes_cleaned.json' 
+RECIPE_SHELVES_PATH = 'files/foodrecipes_shelves/foodrecipes_shelves.db'
+
 class Search(BaseModel):
     ingredients: str
-    keywords: str | None = None
-    type: str | None = None
+    keywords: str | None = ""
+    type: str | None = "simple"
     include_full_recipes: bool = False
     time_range: list[float] | None = None
     serving_size_range: list[float] | None = None
@@ -20,14 +21,14 @@ class Search(BaseModel):
 # Initialize the FastAPI app    
 app = FastAPI()
 # Initialize the search engine and load recipes
-engine = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS)
+engine = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS, recipe_path=RECIPE_SHELVES_PATH)
 
 @app.post("/search/")
 async def search(req: Search):
     
-    return {"results": [x[0] for x in engine.search(ingredients_str=req.ingredients,
+    return {"results": [x for x in engine.search(ingredients_str=req.ingredients,
                                         keywords_str=req.keywords, k=10, ranking=req.type,
-                                        include_full_recipes=req.include_full_recipes,
+                                        return_full_recipes=req.include_full_recipes,
                                         cooking_range=req.time_range,
                                         serving_size_range=req.serving_size_range,
                                         calories_range=req.calories_range)]}

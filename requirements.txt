@@ -1,7 +1,9 @@
-fastapi
+"fastapi[standard]"
 pydantic
 spacy
 pyserini
+ingredient-parser-nlp
+sentence-transformers
 
 # Requirements for Scraping, may be ommitted if not running it 
 Scrapy>=2.5.0

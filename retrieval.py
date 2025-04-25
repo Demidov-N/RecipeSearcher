@@ -14,6 +14,8 @@ from scripts.generating_synonyms import SYNONYMS_OUTPUT_PATH
 import shelve
 from tqdm import tqdm
 from pprint import pprint
+import argparse
+
 
 CONTENT_INDEX = 'indexes/content'
 INGREDIENT_INDEX = 'indexes/ingredients_pretokenized'
@@ -271,45 +273,13 @@ class CustomRecipeSearcher:
             if recipe_value is not None and range[0] <= recipe_value <= range[1]:
                 filtered_results.append(recipe)
         return filtered_results
-
-
-    # Does a search and returns combined results
-    # Simple = sum of sigmoid of sub scores is score
-    def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple', return_full_recipes=False,
-               cooking_range=None, calories_range=None, serving_size_range=None):
-        ingredient_results = None
-        keyword_results = None
-        if ingredients_str == "" and keywords_str == "":
-            raise ValueError("Both ingredients and keywords cannot be empty")
-        if keywords_str == "":
-            ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
-            ingredient_results = sorted([(ing, ingredient_results[ing]['score']) for ing in ingredient_results], key=lambda x: x[1], reverse=True)
-            return ingredient_results
-        elif ingredients_str == "":
-            keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
-            keyword_results = sorted([(ing, keyword_results[ing]['score']) for ing in keyword_results], key=lambda x: x[1], reverse=True)
-            return keyword_results
-        
-        ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k*10, nsyms))
-        keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k*10))
-        top_k = []
-        match ranking:
-            case 'simple':
-                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
-                    bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
-                    if len(top_k) > k:
-                        top_k.pop(0)
-            case _:
-                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
-                    ingredient_results_key = ingredient_results.get(key, {'score': 0, 'rank': 1})
-                    keyword_results_key = keyword_results.get(key, {'score': 0, 'rank': 1})
-                    ingr_score = ingredient_results_key['score'] / ingredient_results_key['rank']
-                    keyword_score = keyword_results_key['score'] / keyword_results_key['rank']
-                    bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
-                    if len(top_k) > k:
-                        top_k.pop(0)
-        top_k.reverse()
-        top_k = top_k[:k]
+    
+    
+    def _filter_and_return(self, top_k, 
+                           return_full_recipes=False,
+                           cooking_range=None,
+                           calories_range=None,
+                           serving_size_range=None):
         if return_full_recipes or cooking_range is not None or calories_range is not None or serving_size_range is not None:
             if self.recipe_reader is None:
                 raise ValueError("Recipe reader is not set, cannot return full recipes")
@@ -330,15 +300,140 @@ class CustomRecipeSearcher:
             if serving_size_range is not None:
                 top_k = self._filter_by(top_k, 'yields', serving_size_range)
         return top_k
-    
-# run a trial ingredient searcher
+        
 
+
+    # Does a search and returns combined results
+    # Simple = sum of sigmoid of sub scores is score
+    def search(self, ingredients_str="", keywords_str="", k=1000, nsyms=5, ranking='simple', return_full_recipes=False,
+               cooking_range=None, calories_range=None, serving_size_range=None):
+        ingredient_results = None
+        keyword_results = None
+        if ingredients_str == "" and keywords_str == "":
+            raise ValueError("Both ingredients and keywords cannot be empty")
+        if keywords_str == "":
+            ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k, nsyms))
+            ingredient_results = sorted([(ing, ingredient_results[ing]['score']) for ing in ingredient_results], key=lambda x: x[1], reverse=True)
+            return self._filter_and_return(ingredient_results, return_full_recipes, cooking_range, calories_range, serving_size_range)
+        elif ingredients_str == "":
+            keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k))
+            keyword_results = sorted([(ing, keyword_results[ing]['score']) for ing in keyword_results], key=lambda x: x[1], reverse=True)
+            return self._filter_and_return(keyword_results, return_full_recipes, cooking_range, calories_range, serving_size_range)
+        
+        ingredient_results = self._convert_scores(self.ingredient_searcher.search_ingredients(ingredients_str, k*10, nsyms))
+        keyword_results = self._convert_scores(self.content_searcher.dirichlet_search(keywords_str, k=k*10))
+        top_k = []
+        match ranking:
+            case 'simple':
+                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
+                    bisect.insort(top_k, (key, ingredient_results[key]['score'] + keyword_results[key]['score']), key=lambda x:x[1])
+                    if len(top_k) > k:
+                        top_k.pop(0)
+            case _:
+                for key in set(list(ingredient_results.keys()) + list(keyword_results.keys())):
+                    ingredient_results_key = ingredient_results.get(key)
+                    keyword_results_key = keyword_results.get(key)
+                    ingr_score = ingredient_results_key['score'] / ingredient_results_key['rank']
+                    keyword_score = keyword_results_key['score'] / keyword_results_key['rank']
+                    bisect.insort(top_k, (key, ingr_score + keyword_score), key=lambda x:x[1])
+                    if len(top_k) > k:
+                        top_k.pop(0)
+        top_k.reverse()
+        top_k = top_k[:k]
+        return self._filter_and_return(top_k, return_full_recipes, cooking_range, calories_range, serving_size_range)
+        
+    
 if __name__ == "__main__":
     
-    ingredient_searcher = CustomRecipeSearcher(CONTENT_INDEX, INGREDIENT_INDEX, INGREDIENT_STATS, synonym_path=INGREDIENT_SYNONYMS, 
-                                                recipe_path=RECIPE_SHELVES_PATH)
+    parser = argparse.ArgumentParser(
+        description="Command-line interface for Recipe Searcher"
+    )
+    parser.add_argument(
+        "-i", "--ingredients",
+        required=True,
+        help="Comma-separated list of ingredients (e.g. \"chicken, garlic, onion\")"
+    )
     
-    result = ingredient_searcher.search(ingredients_str='chicken breast, parmesan',
-                                        keywords_str='quick', k=100, ranking='rrf', cooking_range=(0, 300))
+    parser.add_argument(
+        "-k", "--keywords",
+        default="",
+        help="Optional keywords for recipe filtering (e.g. \"quick, spicy\")"
+    )
+    parser.add_argument(
+        "-n", "--num-results",
+        type=int,
+        default=10,
+        help="Number of top recipes to return"
+    )
+    parser.add_argument(
+        "-r", "--ranking",
+        choices=["simple", "rrf"],
+        default="simple",
+        help="Fusion method: simple summation or rrf"
+    )
+    parser.add_argument(
+        "--time-range",
+        type=float,
+        nargs=2,
+        metavar=("MIN","MAX"),
+        help="Cooking time range in minutes, e.g. --time-range 0 60"
+    )
+    parser.add_argument(
+        "--calories-range",
+        type=float,
+        nargs=2,
+        metavar=("MIN","MAX"),
+        help="Calories per serving range, e.g. --calories-range 100 500"
+    )
+    parser.add_argument(
+        "--servings-range",
+        type=float,
+        nargs=2,
+        metavar=("MIN","MAX"),
+        help="Serving size range, e.g. --servings-range 1 4"
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Include full recipe details in output"
+    )
+    parser.add_argument(
+        "-o", "--output",
+        help="Optional path to write results as a JSON file"
+    )
     
-    pprint(result)
+    args = parser.parse_args()
+    searcher = CustomRecipeSearcher(
+        CONTENT_INDEX,
+        INGREDIENT_INDEX,
+        INGREDIENT_STATS,
+        synonym_path=INGREDIENT_SYNONYMS,
+        recipe_path=RECIPE_SHELVES_PATH
+    )
+
+    results = searcher.search(
+        ingredients_str=args.ingredients,
+        keywords_str=args.keywords,
+        k=args.num_results,
+        ranking=args.ranking,
+        return_full_recipes=args.full,
+        cooking_range=tuple(args.time_range) if args.time_range else None,
+        calories_range=tuple(args.calories_range) if args.calories_range else None,
+        serving_size_range=tuple(args.servings_range) if args.servings_range else None
+    )
+
+    if args.output:
+        # Convert tuples to JSON-friendly dicts
+        out = []
+        for item in results:
+            entry = {"id": item[0], "score": item[1]}
+            if len(item) > 2 and item[2] is not None:
+                entry["recipe"] = item[2]
+            out.append(entry)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2, ensure_ascii=False)
+        print(f"Results written to {args.output}")
+    else:
+        for item in results:
+            pprint(item)
+    
