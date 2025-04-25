@@ -36,7 +36,7 @@ def generate_results(searcher: CustomRecipeSearcher, querries, n_results=10):
             keywords = ""
         
         result = searcher.search(ingredients_str=ingredients, keywords_str=keywords,
-                                 k=n_results, ranking="rrf")
+                                 k=n_results, ranking="simple")
         result_list.append({
             'ingredients': ingredients,
             'keywords': keywords,

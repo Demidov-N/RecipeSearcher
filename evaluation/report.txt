@@ -1,0 +1,140 @@
+
+Query: broccoli, chicken | <blank>
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) Chicken, Broccoli and Noodles Supreme - https://www.food.com/recipe/chicken-broccoli-and-noodles-supreme-409885
+	2. (Relevant) Elva's Chicken and Broccoli Casserole - https://www.food.com/recipe/elvas-chicken-and-broccoli-casserole-213957
+	3. (Relevant) Finicky Feline Diet - https://www.food.com/recipe/finicky-feline-diet-185282
+	4. (Not Relevant) Chicken Divan - https://www.food.com/recipe/chicken-divan-386117
+	5. (Relevant) Chicken and Broccoli Casserole - https://www.food.com/recipe/chicken-and-broccoli-casserole-91972
+	6. (Not Relevant) Broccoli Chicken Cups - https://www.food.com/recipe/broccoli-chicken-cups-288269
+	7. (Relevant) Chicken and Broccoli With Mushroom Sauce - https://www.food.com/recipe/chicken-and-broccoli-with-mushroom-sauce-137606
+	8. (Relevant) Chicken Divan - https://www.food.com/recipe/chicken-divan-271733
+	9. (Relevant) Cheesy Broccoli Potato Soup - https://www.food.com/recipe/cheesy-broccoli-potato-soup-122524
+	10. (Relevant) Cheesy Broccoli Potato Soup - https://www.food.com/recipe/cheesy-broccoli-potato-soup-22785
+
+Query: pasta, tomato | <blank>
+Narrative: (Same as before)
+Annotated Results:
+	1. (Not Relevant) Garlic Herb Eggplant (Aubergine) Rolls - https://www.food.com/recipe/garlic-herb-eggplant-aubergine-rolls-115960
+	2. (Not Relevant) Creamy Italian Pasta - https://www.food.com/recipe/creamy-italian-pasta-295595
+	3. (Relevant) Beef Parmesan - https://www.food.com/recipe/beef-parmesan-280976
+	4. (Relevant) Hot Dog Goulash - https://www.food.com/recipe/hot-dog-goulash-157395
+	5. (Relevant) Cheesy Stuffed Shells - https://www.food.com/recipe/cheesy-stuffed-shells-169282
+	6. (Relevant) Homemade Marinara Sauce - https://www.food.com/recipe/homemade-marinara-sauce-73868
+	7. (Relevant) Garden Fresh Spaghetti - https://www.food.com/recipe/garden-fresh-spaghetti-64548
+	8. (Relevant) Cheesy Chicken and Pasta Shell Casserole - https://www.food.com/recipe/cheesy-chicken-and-pasta-shell-casserole-498333
+	9. (Relevant) Cheesy Shell Lasagne..........mmm!!! - https://www.food.com/recipe/cheesy-shell-lasagne-mmm-367231
+	10. (Relevant) Chicken Tomato Pasta Soup - https://www.food.com/recipe/chicken-tomato-pasta-soup-402865
+
+Query: pork chop | <blank>
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) Herbed Pork Chops - https://www.food.com/recipe/herbed-pork-chops-15394
+	2. (Relevant) Balsamic Glazed Pork Chops - https://www.food.com/recipe/balsamic-glazed-pork-chops-161554
+	3. (Relevant) Croatian Zagorje “kotlovina” - https://www.food.com/recipe/croatian-zagorje-kotlovina-329392
+	4. (Relevant) Fried Pork Chops - https://www.food.com/recipe/fried-pork-chops-476519
+	5. (Relevant) Breaded Pork Chops - https://www.food.com/recipe/breaded-pork-chops-351119
+	6. (Relevant) BBQ Pork Chops and Roasted Potatoes - https://www.food.com/recipe/bbq-pork-chops-and-roasted-potatoes-161671
+	7. (Relevant) Crockpot Pork Chops - https://www.food.com/recipe/crockpot-pork-chops-473577
+	8. (Relevant) A 1 Pork Chops - https://www.food.com/recipe/a-1-pork-chops-520375
+	9. (Relevant) Chicken Lickin Good Pork Chops - https://www.food.com/recipe/chicken-lickin-good-pork-chops-35097
+	10. (Relevant) Arabian Stew - https://www.food.com/recipe/arabian-stew-248331
+
+Query: beans | crock pot
+Narrative: (Same as before)
+Annotated Results:
+	1. (Not Relevant) Bruschetta Beans - https://www.food.com/recipe/bruschetta-beans-342595
+	2. (Not Relevant) Frijoles Refritos (Refried Beans) - https://www.food.com/recipe/frijoles-refritos-refried-beans-8226
+	3. (Not Relevant) Bean Pickles - https://www.food.com/recipe/bean-pickles-26614
+	4. (Not Relevant) Chili Bean Dip - https://www.food.com/recipe/chili-bean-dip-403978
+	5. (Not Relevant) Bean Burritos in a Hurry - https://www.food.com/recipe/bean-burritos-in-a-hurry-66372
+	6. (Not Relevant) Amaranth - https://www.food.com/recipe/amaranth-190649
+	7. (Not Relevant) Hummus - https://www.food.com/recipe/hummus-159324
+	8. (Not Relevant) Cheesy Bean Dip Made Easy - https://www.food.com/recipe/cheesy-bean-dip-made-easy-112745
+	9. (Not Relevant) Frijoles Refritos (Classic Mexican Refried Beans) - https://www.food.com/recipe/frijoles-refritos-classic-mexican-refried-beans-69761
+	10. (Not Relevant) Healthy Bean Buns / Dumplings - https://www.food.com/recipe/healthy-bean-buns-dumplings-217419
+
+Query: <blank> | deep fried
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) Deep Fried French Fries - https://www.food.com/recipe/deep-fried-french-fries-419360
+	2. (Relevant) Deep Fried Catfish - https://www.food.com/recipe/deep-fried-catfish-17465
+	3. (Relevant) Deep Fry Breading - https://www.food.com/recipe/deep-fry-breading-288919
+	4. (Relevant) Deep Fried Bananas - https://www.food.com/recipe/deep-fried-bananas-196635
+	5. (Relevant) Deep Fried Candy Bars - https://www.food.com/recipe/deep-fried-candy-bars-38188
+	6. (Relevant) Deep Fried Cheese Balls - https://www.food.com/recipe/deep-fried-cheese-balls-103350
+	7. (Relevant) Deep-Fried Eggplant (Aubergine) - https://www.food.com/recipe/deep-fried-eggplant-aubergine-26492
+	8. (Relevant) Deep Fried Stuffed Olives - https://www.food.com/recipe/deep-fried-stuffed-olives-532204
+	9. (Relevant) Deep-Fried Jalapeno Slices - https://www.food.com/recipe/deep-fried-jalapeno-slices-191249
+	10. (Relevant) Deep Fried Jalapeno Roll Ups - https://www.food.com/recipe/deep-fried-jalapeno-roll-ups-216902
+
+Query: chicken, garlic, rice | spicy, quick
+Narrative: (Same as before)
+Annotated Results:
+	1. (Not Relevant) Creamy Chicken (Or Turkey) and Rice Soup - https://www.food.com/recipe/creamy-chicken-or-turkey-and-rice-soup-402200
+	2. (Relevant) Chicken "stuff" - https://www.food.com/recipe/chicken-stuff-482939
+	3. (Not Relevant) Grandma Landers's Chicken 'n' Rice - https://www.food.com/recipe/grandma-landerss-chicken-n-rice-150261
+	4. (Relevant) Garlic Broiled Chicken - https://www.food.com/recipe/garlic-broiled-chicken-394350
+	5. (Relevant) Gumbo Ya Ya - https://www.food.com/recipe/gumbo-ya-ya-51112
+	6. (Relevant) Gumbo Ya Ya - https://www.food.com/recipe/gumbo-ya-ya-435269
+	7. (Not Relevant) Green Rice - https://www.food.com/recipe/green-rice-214382
+	8. (Relevant) Fried Rice - Zojirushi Rice Cooker - https://www.food.com/recipe/fried-rice-zojirushi-rice-cooker-448601
+	9. (Not Relevant) Brown Rice & Lentil Casserole - https://www.food.com/recipe/brown-rice-lentil-casserole-363103
+	10. (Not Relevant) Death Chicken - https://www.food.com/recipe/death-chicken-102916
+
+Query: almond flour, eggs, coconut oil | gluten-free, dessert
+Narrative: (Same as before)
+Annotated Results:
+	1. (Not Relevant) Cranberry Chews - https://www.food.com/recipe/cranberry-chews-292319
+	2. (Not Relevant) Gluten Free Triple Coconut Muffins Delicious and Healthy - https://www.food.com/recipe/gluten-free-triple-coconut-muffins-delicious-and-healthy-492352
+	3. (Relevant) Banana Pancakes (Flour-Less, Piña Colada Flavor) - https://www.food.com/recipe/banana-pancakes-flour-less-pi-a-colada-flavor-422715
+	4. (Relevant) Caramel Banana Pancakes - https://www.food.com/recipe/caramel-banana-pancakes-534050
+	5. (Relevant) Gluten-Free Carrot Ginger Muffins - https://www.food.com/recipe/gluten-free-carrot-ginger-muffins-535136
+	6. (Not Relevant) Coconut Bread II - https://www.food.com/recipe/coconut-bread-ii-1717
+	7. (Not Relevant) Chortletorte - https://www.food.com/recipe/chortletorte-543490
+	8. (Relevant) Delectable Experiment - https://www.food.com/recipe/delectable-experiment-521508
+	9. (Relevant) Carrot, Cardamom & Walnut Muffins - https://www.food.com/recipe/carrot-cardamom-walnut-muffins-534071
+	10. (Relevant) Gluten Free Zucchini Fritters - https://www.food.com/recipe/gluten-free-zucchini-fritters-521739
+
+Query: beef, bell peppers, onion | quick, stir-fry
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) Easy Beef Skillet Dinner - https://www.food.com/recipe/easy-beef-skillet-dinner-86240
+	2. (Not Relevant) Beefy Calzones - https://www.food.com/recipe/beefy-calzones-277269
+	3. (Not Relevant) Char's Cajun Beef & Sausage Stuffed Bell Peppers - https://www.food.com/recipe/chars-cajun-beef-sausage-stuffed-bell-peppers-9457
+	4. (Not Relevant) Gulaschsuppe - https://www.food.com/recipe/gulaschsuppe-422989
+	5. (Not Relevant) Burritos Crockery Pot Style - https://www.food.com/recipe/burritos-crockery-pot-style-368268
+	6. (Not Relevant) Dees Philly French Dip - https://www.food.com/recipe/dees-philly-french-dip-468646
+	7. (Not Relevant) Crock Pot Italian Beef - https://www.food.com/recipe/crock-pot-italian-beef-513438
+	8. (Relevant) Dirty Rice - https://www.food.com/recipe/dirty-rice-273604
+	9. (Relevant) Helen's Meatloaf - https://www.food.com/recipe/helens-meatloaf-71879
+	10. (Relevant) Cheeseburger Stuffed Bell Peppers Cups - https://www.food.com/recipe/cheeseburger-stuffed-bell-peppers-cups-126476
+
+Query: chicken, garlic, onion, tomato, basil, oregano, parsley, thyme, rosemary, lemon, olive oil, butter, salt, pepper, paprika | spicy
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) BBQ Chicken With Red Peppers and Asiago - https://www.food.com/recipe/bbq-chicken-with-red-peppers-and-asiago-241216
+	2. (Relevant) Hairy Bikers' Chicken Paprikas - https://www.food.com/recipe/hairy-bikers-chicken-paprikas-325187
+	3. (Relevant) Chicken Scarpariello (Roast Chicken in Lemon&wine) - https://www.food.com/recipe/chicken-scarpariello-roast-chicken-in-lemon-wine-172789
+	4. (Relevant) Delicious Crock Pot Stuffed Bell Peppers - https://www.food.com/recipe/delicious-crock-pot-stuffed-bell-peppers-378505
+	5. (Relevant) Chicken Scarpariello - https://www.food.com/recipe/chicken-scarpariello-384429
+	6. (Relevant) Best-Ever Grilled Chicken Kebabs - https://www.food.com/recipe/best-ever-grilled-chicken-kebabs-11157
+	7. (Relevant) Grilled Strip Loin Steak With Bacon Chimichurri - https://www.food.com/recipe/grilled-strip-loin-steak-with-bacon-chimichurri-305487
+	8. (Relevant) Beer Can Chicken - https://www.food.com/recipe/beer-can-chicken-330250
+	9. (Relevant) Chicken Scarpariello - https://www.food.com/recipe/chicken-scarpariello-147415
+	10. (Not Relevant) Herb Rub (Great for Pork or Chicken) - https://www.food.com/recipe/herb-rub-great-for-pork-or-chicken-142453
+
+Query: eggplant, tomato, feta cheese, olives, cucumber, red onion, mint, oregano | Mediterranean, vegan, fresh, quick
+Narrative: (Same as before)
+Annotated Results:
+	1. (Relevant) Greek Pita - https://www.food.com/recipe/greek-pita-334646
+	2. (Relevant) Cold Potato Salad With Tomatoes, Olives and Feta - https://www.food.com/recipe/cold-potato-salad-with-tomatoes-olives-and-feta-142022
+	3. (Relevant) Beef and Feta Pitas - https://www.food.com/recipe/beef-and-feta-pitas-436337
+	4. (Relevant) Ange's Vegetarian Pizza - https://www.food.com/recipe/anges-vegetarian-pizza-430059
+	5. (Relevant) Greek Salad - https://www.food.com/recipe/greek-salad-219822
+	6. (Not Relevant) Greek Walnut Salsa - https://www.food.com/recipe/greek-walnut-salsa-347373
+	7. (Relevant) Greek Salad With Butterbeans - https://www.food.com/recipe/greek-salad-with-butterbeans-521379
+	8. (Relevant) Horiatiki Salata - https://www.food.com/recipe/horiatiki-salata-170922
+	9. (Relevant) Baked Veggie Quesadillas - https://www.food.com/recipe/baked-veggie-quesadillas-204342
+	10. (Relevant) Best Macaroni Salad Ever - https://www.food.com/recipe/best-macaroni-salad-ever-432684
